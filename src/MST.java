@@ -3,18 +3,18 @@ import java.util.*;
 
 class MST {
 
-	public static ArrayList<Edge> prims(List<List<Edge>> G) {
-		ArrayList<Edge> tree = new ArrayList<>();
-		PriorityQueue<Edge> queue = new PriorityQueue<>((Object o1, Object o2) -> {
+	public static List<Edge> prims(List<List<Edge>> graph) {
+		List<Edge> tree = new ArrayList<>();
+		Queue<Edge> queue = new PriorityQueue<>((Object o1, Object o2) -> {
 			Edge first = (Edge) o1;
 			Edge second = (Edge) o2;
 
 			return Double.compare(first.weight, second.weight);
 		});
 
-		queue.addAll(G.get(0));
+		queue.addAll(graph.get(0));
 
-		boolean[] visited = new boolean[G.size()];
+		boolean[] visited = new boolean[graph.size()];
 		visited[0] = true;
 
 		while (!queue.isEmpty()) {
@@ -25,7 +25,7 @@ class MST {
 				continue;
 			}
 			visited[e.origin] = true;
-			for (Edge edge : G.get(e.destination)) {
+			for (Edge edge : graph.get(e.destination)) {
 				if (!visited[edge.destination]) {
 					queue.add(edge);
 				}
@@ -63,5 +63,10 @@ class Edge {
 		this.origin = o;
 		this.destination = d;
 		this.weight = w;
+	}
+
+	@Override
+	public String toString() {
+		return this.origin + "	->	" + this.destination + " =	" + this.weight;
 	}
 }

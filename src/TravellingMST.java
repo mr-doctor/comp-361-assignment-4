@@ -6,12 +6,7 @@ public class TravellingMST {
 	public TravellingMST() {
 		TSPHandler t = new TSPHandler("brazil58.tsp");
 
-		int vertices = 0;
 		List<List<TSPNode>> map = t.getMap();
-		for (List<TSPNode> row : map) {
-			vertices += row.size();
-		}
-
 		List<Edge> edges = new ArrayList<>();
 
 		for (List<TSPNode> row : map) {
@@ -21,13 +16,22 @@ public class TravellingMST {
 		}
 
 		List<List<Edge>> graph = MST.createGraph(edges);
-		ArrayList<Edge> mst = MST.prims(graph);
+		List<Edge> mst = MST.prims(graph);
 
-		System.out.println("MST {");
-		for (Edge e : mst) {
-			System.out.println("	" + e.origin + "	-	" + e.destination + ": 	" + e.weight);
+		List<Edge> traversal = new Traverser(mst).traverse();
+
+		System.out.println("Traversal {");
+		for (Edge edge : traversal) {
+			System.out.print("	");
+			System.out.println(mst.indexOf(edge));
 		}
 		System.out.println("}");
+
+		/*System.out.println("MST {");
+		for (Edge e : mst) {
+			System.out.println("	" + e);
+		}
+		System.out.println("}");*/
 	}
 
 	public static void main(String[] args) {
