@@ -1,14 +1,19 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class TSPHandler {
 
-	private List<List<TSPNode>> map = new ArrayList<>();
+	private List<List<TSPEdge>> table = new ArrayList<>();
 	private int dimension;
+
+	private boolean isEdgeWeight = false;
+
+
+
+	private List<TSPNode> nodes = new ArrayList<>();
 
 	public TSPHandler(String filename) {
 		loadFile(filename);
@@ -30,28 +35,75 @@ public class TSPHandler {
 	private void parseFile(File file) throws FileNotFoundException {
 		Scanner s = new Scanner(file);
 		String line = "";
+		String textSoFar = "";
 		while (s.hasNextLine()) {
 			line = s.nextLine();
-			if (line.equals("EDGE_WEIGHT_SECTION")) {
+			if (!Character.isLetter(line.charAt(0))) {
 				break;
 			}
 			if (line.equals("DIMENSION")) {
 				this.dimension = s.nextInt();
 			}
+			textSoFar += line;
 		}
-		line = s.nextLine();
+
+		if (textSoFar.contains("EDGE_WEIGHT_SECTION")) {
+			isEdgeWeight = true;
+		} else if (textSoFar.contains("NODE_COORD_SECTION")) {
+			isEdgeWeight = false;
+		} else {
+			throw new RuntimeException("Unsupported node data type");
+		}
+
 		int x;
 		int y = 0;
 		while(!line.equals("EOF")) {
-			x = 0;
-			map.add(new ArrayList<>());
-			for (String value : line.split(" ")) {
-				map.get(map.size() - 1).add(new TSPNode(Integer.parseInt(value), x, y));
-				x++;
+			if (isEdgeWeight) {
+				x = 0;
+				table.add(new ArrayList<>());
+				for (String value : line.split(" ")) {
+					table.get(table.size() - 1).add(new TSPEdge(Integer.parseInt(value), x, y));
+					x++;
+				}
+				y++;
+			} else {
+				String[] split = line.split(" ");
+				split = clean(split);
+				nodes.add(new TSPNode(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])));
 			}
-			y++;
 			line = s.nextLine();
 		}
+
+		if (!isEdgeWeight) {
+			for(TSPNode node1 : nodes) {
+				x = 0;
+				table.add(new ArrayList<>());
+				for(TSPNode node2 : nodes) {
+					if (node1.equals(node2)) {
+						continue;
+					}
+					table.get(table.size() - 1).add(new TSPEdge(node1.weightTo(node2), x, y));
+					x++;
+				}
+				y++;
+			}
+		}
+	}
+	public List<TSPNode> getNodes() {
+		return nodes;
+	}
+	private static String[] clean(String[] split) {
+		List<String> cleaned = new ArrayList<>();
+		for (String s : split) {
+			if (isNumeric(s)) {
+				cleaned.add(s);
+			}
+		}
+		return cleaned.toArray(new String[0]);
+	}
+
+	public static boolean isNumeric(String str) {
+		return str.matches("-?\\d+(\\.\\d+)?");
 	}
 
 	private static String getFileExtension(File file) {
@@ -63,25 +115,36 @@ public class TSPHandler {
 		return name.substring(lastIndexOf);
 	}
 
-	public List<List<TSPNode>> getMap() {
-		return map;
+	public List<List<TSPEdge>> getTable() {
+		return table;
 	}
 
 	public int distanceBetween(int x, int y) {
-		return map.get(y).get(x).getWeight();
+		return table.get(y).get(x).getWeight();
 	}
 
 	public int getDimension() {
 		return dimension;
 	}
+
+	static void print(String[] arr) {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("[");
+		for(String s : arr) {
+			stringBuilder.append(s);
+			stringBuilder.append(", ");
+		}
+		stringBuilder.append("]");
+		System.out.println(stringBuilder.toString());
+	}
 }
 
-class TSPNode {
+class TSPEdge {
 	private final int x;
 	private final int y;
 	private final int weight;
 
-	public TSPNode(int weight, int x, int y) {
+	public TSPEdge(int weight, int x, int y) {
 		this.x = x;
 		this.y = y;
 		this.weight = weight;
@@ -102,5 +165,38 @@ class TSPNode {
 	@Override
 	public String toString() {
 		return "[" + getX() + "," + getY() + "]";
+	}
+}
+
+class TSPNode {
+	private final int x;
+	private final int y;
+	private final int id;
+
+	public TSPNode(int id, int x, int y) {
+		this.x = x;
+		this.y = y;
+		this.id = id;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public int getID() {
+		return id;
+	}
+
+	@Override
+	public String toString() {
+		return "[" + getX() + "," + getY() + "]";
+	}
+
+	public int weightTo(TSPNode node2) {
+		return (int) Math.sqrt(Math.pow(this.x - node2.x, 2) + Math.pow(this.y - node2.y, 2));
 	}
 }

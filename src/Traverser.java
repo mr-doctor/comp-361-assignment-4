@@ -1,14 +1,15 @@
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 class Traverser {
 
-	private final List<Edge> mst;
+	private final List<Edge> graph;
 	private List<Edge> edges = new ArrayList<>();
 
-	public Traverser(List<Edge> mst) {
-		this.mst = mst;
+	public Traverser(List<Edge> graph) {
+		this.graph = graph;
 	}
 
 	List<Edge> traverse() {
@@ -20,11 +21,11 @@ class Traverser {
 
 	private void addNextEdge(int node) {
 
-		if (node >= mst.size()) {
+		if (node >= graph.size()) {
 			return;
 		}
 
-		edges.add(mst.get(node));
+		edges.add(graph.get(node));
 
 		List<Edge> children = getChildren(node);
 
@@ -40,12 +41,21 @@ class Traverser {
 	private List<Edge> getChildren(int parent) {
 		List<Edge> children = new ArrayList<>();
 
-		for (Edge e : mst) {
+		for (Edge e : graph) {
 			if (e.origin == parent) {
 				children.add(e);
 			}
 		}
 		return children;
+	}
+
+	Edge getEdge(int origin, int destination) {
+		for (Edge e : graph) {
+			if (e.origin == origin && e.destination == destination) {
+				return e;
+			}
+		}
+		return null;
 	}
 
 }

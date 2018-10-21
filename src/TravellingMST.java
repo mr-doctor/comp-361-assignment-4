@@ -3,14 +3,14 @@ import java.util.List;
 
 public class TravellingMST {
 
-	public TravellingMST() {
-		TSPHandler t = new TSPHandler("brazil58.tsp");
+	public TravellingMST(String filename) {
+		TSPHandler t = new TSPHandler(filename);
 
-		List<List<TSPNode>> map = t.getMap();
+		List<List<TSPEdge>> map = t.getTable();
 		List<Edge> edges = new ArrayList<>();
 
-		for (List<TSPNode> row : map) {
-			for (TSPNode node : row) {
+		for (List<TSPEdge> row : map) {
+			for (TSPEdge node : row) {
 				edges.add(new Edge(node.getX(), node.getY(), node.getWeight()));
 			}
 		}
@@ -18,23 +18,25 @@ public class TravellingMST {
 		List<List<Edge>> graph = MST.createGraph(edges);
 		List<Edge> mst = MST.prims(graph);
 
-		List<Edge> traversal = new Traverser(mst).traverse();
+		Traverser traverser = new Traverser(mst);
 
+		List<Edge> traversal = traverser.traverse();
+
+		int net = 0;
 		System.out.println("Traversal {");
 		for (Edge edge : traversal) {
 			System.out.print("	");
 			System.out.println(mst.indexOf(edge));
+			net+=edge.weight;
 		}
+		System.out.println("	" + 0);
+		System.out.println("	Total Weight: " + net);
 		System.out.println("}");
-
-		/*System.out.println("MST {");
-		for (Edge e : mst) {
-			System.out.println("	" + e);
-		}
-		System.out.println("}");*/
 	}
 
 	public static void main(String[] args) {
-		TravellingMST t = new TravellingMST();
+		TravellingMST t = new TravellingMST("st70.tsp");
+		t = new TravellingMST("brazil58.tsp");
+		t = new TravellingMST("a280.tsp");
 	}
 }
